@@ -11,7 +11,7 @@ const SignInPage = () => {
 
 			{/* SignIn Component */}
 			<div className='relative z-10'>
-				<SignIn />
+				<SignIn forceRedirectUrl='/auth-callback' />
 			</div>
 		</div>
 	);
