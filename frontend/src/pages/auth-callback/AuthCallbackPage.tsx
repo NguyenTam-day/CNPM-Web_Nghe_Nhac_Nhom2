@@ -12,7 +12,14 @@ const AuthCallbackPage = () => {
 
 	useEffect(() => {
 		const syncUser = async () => {
-			if (!isLoaded || !user || syncAttempted.current) return;
+			if (!isLoaded) return;
+
+			if (!user) {
+				navigate("/");
+				return;
+			}
+
+			if (syncAttempted.current) return;
 
 			try {
 				syncAttempted.current = true;
