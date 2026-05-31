@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import { usePlaylistStore } from "@/stores/usePlaylistStore";
+import { SignedIn } from "@clerk/clerk-react";
+import { cn } from "@/lib/utils";
+import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, Heart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const formatTime = (seconds: number) => {
@@ -12,11 +15,14 @@ const formatTime = (seconds: number) => {
 
 export const PlaybackControls = () => {
 	const { currentSong, isPlaying, togglePlay, playNext, playPrevious, showLyrics, toggleLyrics } = usePlayerStore();
+	const { toggleFavorite, isFavorite } = usePlaylistStore();
 
 	const [volume, setVolume] = useState(75);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
+
+	const isFav = currentSong ? isFavorite(currentSong._id) : false;
 
 	useEffect(() => {
 		audioRef.current = document.querySelector("audio");
@@ -64,7 +70,7 @@ export const PlaybackControls = () => {
 
 			<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto'>
 				{/* currently playing song */}
-				<div className='flex items-center gap-3 sm:gap-4 min-w-[120px] sm:min-w-[180px] w-[35%] sm:w-[30%]'>
+				<div className='flex items-center gap-3 sm:gap-4 min-w-[150px] sm:min-w-[220px] w-[35%] sm:w-[30%]'>
 					{currentSong && (
 						<>
 							<img
@@ -80,6 +86,19 @@ export const PlaybackControls = () => {
 									{currentSong.artist}
 								</div>
 							</div>
+							<SignedIn>
+								<Button
+									size="icon"
+									variant="ghost"
+									className={cn(
+										"hover:text-white transition-all h-8 w-8 rounded-full",
+										isFav ? "text-green-500 hover:text-green-400" : "text-zinc-400"
+									)}
+									onClick={() => toggleFavorite(currentSong)}
+								>
+									<Heart className={cn("h-4 w-4 sm:h-5 sm:w-5", isFav && "fill-green-500 text-green-500")} />
+								</Button>
+							</SignedIn>
 						</>
 					)}
 				</div>

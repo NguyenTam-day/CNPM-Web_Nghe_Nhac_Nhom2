@@ -8,6 +8,8 @@ import AlbumPage from "./pages/album/AlbumPage";
 import AdminPage from "./pages/admin/AdminPage";
 import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
+import PlaylistPage from "./pages/playlist/PlaylistPage";
+import LikedSongsPage from "./pages/playlist/LikedSongsPage";
 
 import { Toaster } from "react-hot-toast";
 import NotFoundPage from "./pages/404/NotFoundPage";
@@ -36,6 +38,22 @@ function App() {
 						}
 					/>
 					<Route path='albums/:albumId' element={<AlbumPage />} />
+					<Route
+						path='playlists/:playlistId'
+						element={
+							<ProtectedRoute>
+								<PlaylistPage />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path='liked-songs'
+						element={
+							<ProtectedRoute>
+								<LikedSongsPage />
+							</ProtectedRoute>
+						}
+					/>
 				</Route>
 
 				<Route

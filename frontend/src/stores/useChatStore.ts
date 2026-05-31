@@ -13,6 +13,7 @@ interface ChatStore {
 	userActivities: Map<string, string>;
 	messages: Message[];
 	selectedUser: User | null;
+	unreadUsers: Set<string>;
 
 	fetchUsers: () => Promise<void>;
 	initSocket: (userId: string) => void;
@@ -37,8 +38,20 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 	userActivities: new Map(),
 	messages: [],
 	selectedUser: null,
+	unreadUsers: new Set(),
 
-	setSelectedUser: (user) => set({ selectedUser: user }),
+	setSelectedUser: (user) => {
+		set((state) => {
+			const newUnreadUsers = new Set(state.unreadUsers);
+			if (user) {
+				newUnreadUsers.delete(user.clerkId);
+			}
+			return {
+				selectedUser: user,
+				unreadUsers: newUnreadUsers,
+			};
+		});
+	},
 
 	fetchUsers: async () => {
 		set({ isLoading: true, error: null });
@@ -82,9 +95,21 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 			});
 
 			socket.on("receive_message", (message: Message) => {
-				set((state) => ({
-					messages: [...state.messages, message],
-				}));
+				set((state) => {
+					const isCurrentlyChattingWithSender =
+						window.location.pathname === "/chat" &&
+						state.selectedUser?.clerkId === message.senderId;
+
+					const newUnreadUsers = new Set(state.unreadUsers);
+					if (!isCurrentlyChattingWithSender) {
+						newUnreadUsers.add(message.senderId);
+					}
+
+					return {
+						messages: [...state.messages, message],
+						unreadUsers: newUnreadUsers,
+					};
+				});
 			});
 
 			socket.on("message_sent", (message: Message) => {
@@ -123,7 +148,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 		set({ isLoading: true, error: null });
 		try {
 			const response = await axiosInstance.get(`/users/messages/${userId}`);
-			set({ messages: response.data });
+			set((state) => {
+				const newUnreadUsers = new Set(state.unreadUsers);
+				newUnreadUsers.delete(userId);
+				return {
+					messages: response.data,
+					unreadUsers: newUnreadUsers,
+				};
+			});
 		} catch (error: any) {
 			set({ error: error.response.data.message });
 		} finally {

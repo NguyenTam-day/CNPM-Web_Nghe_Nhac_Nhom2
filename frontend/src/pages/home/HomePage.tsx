@@ -7,6 +7,7 @@ import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { ArrowLeft, Clock, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SongActionMenu from "@/components/SongActionMenu";
 
 const formatDuration = (seconds: number) => {
 	const minutes = Math.floor(seconds / 60);
@@ -119,13 +120,14 @@ const HomePage = () => {
 					{/* Songs List Table */}
 					<div className="bg-black/20 backdrop-blur-sm px-4 sm:px-6">
 						{/* Table Header */}
-						<div className="grid grid-cols-[16px_4fr_2fr_1fr] gap-4 px-4 py-3 text-sm text-zinc-400 border-b border-white/5 font-semibold">
+						<div className="grid grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 border-b border-white/5 font-semibold">
 							<div>#</div>
 							<div>Title</div>
 							<div>Released Date</div>
 							<div className="flex justify-end">
 								<Clock className="h-4 w-4" />
 							</div>
+							<div></div>
 						</div>
 
 						{/* Table Songs */}
@@ -136,7 +138,7 @@ const HomePage = () => {
 									<div
 										key={song._id}
 										onClick={() => handlePlaySectionSong(index)}
-										className={`grid grid-cols-[16px_4fr_2fr_1fr] gap-4 px-4 py-3 text-sm text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer items-center transition-all ${
+										className={`grid grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer items-center transition-all ${
 											isCurrentSong ? "bg-white/5" : ""
 										}`}
 									>
@@ -169,6 +171,9 @@ const HomePage = () => {
 
 										<div className="flex justify-end text-zinc-300 font-medium">
 											{formatDuration(song.duration)}
+										</div>
+										<div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
+											<SongActionMenu song={song} />
 										</div>
 									</div>
 								);
