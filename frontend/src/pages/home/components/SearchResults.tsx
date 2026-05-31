@@ -61,14 +61,14 @@ const SearchResults = ({ songs, query }: SearchResultsProps) => {
 							{/* Index or play icon */}
 							<div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
 								{isCurrentSong && isPlaying ? (
-									<div className="text-emerald-400 text-base font-bold">♫</div>
+									<div key="playing-icon" className="text-emerald-400 text-base font-bold">♫</div>
 								) : (
-									<>
+									<div key="standard-icon" className="contents">
 										<span className={`text-zinc-500 text-sm group-hover:hidden ${isCurrentSong ? "hidden" : ""}`}>
 											{index + 1}
 										</span>
 										<Play className={`h-4 w-4 text-white fill-white hidden group-hover:block ${isCurrentSong ? "block" : ""}`} />
-									</>
+									</div>
 								)}
 							</div>
 

@@ -3,6 +3,7 @@ import {
 	getFeaturedSongsService,
 	getMadeForYouSongsService,
 	getTrendingSongsService,
+	searchSongsService,
 } from "../service/song.service.js";
 
 export const getAllSongs = async (req, res, next) => {
@@ -44,6 +45,16 @@ export const getMadeForYouSongs = async (req, res, next) => {
 export const getTrendingSongs = async (req, res, next) => {
 	try {
 		const songs = await getTrendingSongsService();
+		res.json(songs);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const searchSongs = async (req, res, next) => {
+	try {
+		const { q } = req.query;
+		const songs = await searchSongsService(q);
 		res.json(songs);
 	} catch (error) {
 		next(error);

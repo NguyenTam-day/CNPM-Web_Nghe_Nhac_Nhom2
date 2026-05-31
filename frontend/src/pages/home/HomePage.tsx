@@ -1,6 +1,6 @@
 import Topbar from "@/components/Topbar";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FeaturedSection from "./components/FeaturedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
@@ -27,6 +27,9 @@ const HomePage = () => {
 		featuredSongs,
 		trendingSongs,
 		songs,
+		searchResults,
+		searchSongs,
+		clearSearchResults,
 	} = useMusicStore();
 
 	const { initializeQueue, currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
@@ -53,28 +56,19 @@ const HomePage = () => {
 		}
 	}, [initializeQueue, madeForYouSongs, trendingSongs, featuredSongs]);
 
-	// Deduplicated pool of all loaded songs for search
-	const allSongsPool = useMemo(() => {
-		const seen = new Set<string>();
-		const pool = [...featuredSongs, ...madeForYouSongs, ...trendingSongs];
-		return pool.filter((song) => {
-			if (seen.has(song._id)) return false;
-			seen.add(song._id);
-			return true;
-		});
-	}, [featuredSongs, madeForYouSongs, trendingSongs]);
+	// Debounced backend search query
+	useEffect(() => {
+		if (!searchQuery.trim()) {
+			clearSearchResults();
+			return;
+		}
 
-	// Search results filtered by query
-	const searchResults = useMemo(() => {
-		if (!searchQuery.trim()) return [];
-		const q = searchQuery.toLowerCase().trim();
-		return allSongsPool.filter(
-			(song) =>
-				song.title.toLowerCase().includes(q) ||
-				song.artist.toLowerCase().includes(q) ||
-				(song.genres || []).some((g) => g.toLowerCase().includes(q))
-		);
-	}, [searchQuery, allSongsPool]);
+		const timer = setTimeout(() => {
+			searchSongs(searchQuery);
+		}, 350);
+
+		return () => clearTimeout(timer);
+	}, [searchQuery, searchSongs, clearSearchResults]);
 
 	const isSearching = searchQuery.trim().length > 0;
 
@@ -250,9 +244,11 @@ const HomePage = () => {
 
 					{/* Search Results or Normal Home */}
 					{isSearching ? (
-						<SearchResults songs={searchResults} query={searchQuery} />
+						<div key="search-view">
+							<SearchResults songs={searchResults} query={searchQuery} />
+						</div>
 					) : (
-						<>
+						<div key="home-view">
 							<h1 className="text-2xl sm:text-3xl font-bold mb-6 text-white">Good afternoon</h1>
 							<FeaturedSection />
 
@@ -270,7 +266,7 @@ const HomePage = () => {
 									onShowAll={() => setActiveSection("trending")}
 								/>
 							</div>
-						</>
+						</div>
 					)}
 				</div>
 			</ScrollArea>

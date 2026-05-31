@@ -27,3 +27,15 @@ export const getTrendingSongsService = async () => {
 		},
 	]);
 };
+
+export const searchSongsService = async (query) => {
+	if (!query) return [];
+	const regex = new RegExp(query, "i");
+	return await Song.find({
+		$or: [
+			{ title: regex },
+			{ artist: regex },
+			{ genres: regex }
+		]
+	}).sort({ createdAt: -1 });
+};

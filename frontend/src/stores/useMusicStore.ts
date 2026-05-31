@@ -26,6 +26,9 @@ interface MusicStore {
 	deleteAlbum: (id: string) => Promise<void>;
 	updateSong: (id: string, formData: FormData) => Promise<void>;
 	updateAlbum: (id: string, formData: FormData) => Promise<void>;
+	searchResults: Song[];
+	searchSongs: (query: string) => Promise<void>;
+	clearSearchResults: () => void;
 }
 
 export const useMusicStore = create<MusicStore>((set) => ({
@@ -43,6 +46,7 @@ export const useMusicStore = create<MusicStore>((set) => ({
 		totalUsers: 0,
 		totalArtists: 0,
 	},
+	searchResults: [],
 
 	deleteSong: async (id) => {
 		set({ isLoading: true, error: null });
@@ -208,5 +212,25 @@ export const useMusicStore = create<MusicStore>((set) => ({
 		} finally {
 			set({ isLoading: false });
 		}
+	},
+
+	searchSongs: async (query) => {
+		if (!query.trim()) {
+			set({ searchResults: [] });
+			return;
+		}
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.get(`/songs/search?q=${encodeURIComponent(query)}`);
+			set({ searchResults: response.data });
+		} catch (error: any) {
+			set({ error: error.response?.data?.message || error.message });
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	clearSearchResults: () => {
+		set({ searchResults: [] });
 	},
 }));
