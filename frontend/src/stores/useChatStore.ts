@@ -45,6 +45,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 			const newUnreadUsers = new Set(state.unreadUsers);
 			if (user) {
 				newUnreadUsers.delete(user.clerkId);
+				// Save to localStorage
+				const currentUserId = (socket.auth as any)?.userId;
+				if (currentUserId) {
+					localStorage.setItem(`unread_users_${currentUserId}`, JSON.stringify(Array.from(newUnreadUsers)));
+				}
 			}
 			return {
 				selectedUser: user,
@@ -69,6 +74,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 		if (!get().isConnected) {
 			socket.auth = { userId };
 			socket.connect();
+
+			// Load unreadUsers from localStorage
+			const saved = localStorage.getItem(`unread_users_${userId}`);
+			const loadedUnread = saved ? new Set<string>(JSON.parse(saved)) : new Set<string>();
+			set({ unreadUsers: loadedUnread });
 
 			socket.emit("user_connected", userId);
 
@@ -103,6 +113,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 					const newUnreadUsers = new Set(state.unreadUsers);
 					if (!isCurrentlyChattingWithSender) {
 						newUnreadUsers.add(message.senderId);
+						// Save to localStorage
+						const currentUserId = (socket.auth as any)?.userId;
+						if (currentUserId) {
+							localStorage.setItem(`unread_users_${currentUserId}`, JSON.stringify(Array.from(newUnreadUsers)));
+						}
 					}
 
 					return {
@@ -151,6 +166,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 			set((state) => {
 				const newUnreadUsers = new Set(state.unreadUsers);
 				newUnreadUsers.delete(userId);
+				// Save to localStorage
+				const currentUserId = (socket.auth as any)?.userId;
+				if (currentUserId) {
+					localStorage.setItem(`unread_users_${currentUserId}`, JSON.stringify(Array.from(newUnreadUsers)));
+				}
 				return {
 					messages: response.data,
 					unreadUsers: newUnreadUsers,
