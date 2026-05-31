@@ -1,13 +1,14 @@
 import Topbar from "@/components/Topbar";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import FeaturedSection from "./components/FeaturedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { ArrowLeft, Clock, Pause, Play } from "lucide-react";
+import { ArrowLeft, Clock, Pause, Play, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SongActionMenu from "@/components/SongActionMenu";
+import SearchResults from "./components/SearchResults";
 
 const formatDuration = (seconds: number) => {
 	const minutes = Math.floor(seconds / 60);
@@ -30,6 +31,8 @@ const HomePage = () => {
 
 	const { initializeQueue, currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
 	const [activeSection, setActiveSection] = useState<"made-for-you" | "trending" | null>(null);
+	const [searchQuery, setSearchQuery] = useState("");
+	const searchInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		fetchFeaturedSongs();
@@ -49,6 +52,31 @@ const HomePage = () => {
 			initializeQueue(allSongs);
 		}
 	}, [initializeQueue, madeForYouSongs, trendingSongs, featuredSongs]);
+
+	// Deduplicated pool of all loaded songs for search
+	const allSongsPool = useMemo(() => {
+		const seen = new Set<string>();
+		const pool = [...featuredSongs, ...madeForYouSongs, ...trendingSongs];
+		return pool.filter((song) => {
+			if (seen.has(song._id)) return false;
+			seen.add(song._id);
+			return true;
+		});
+	}, [featuredSongs, madeForYouSongs, trendingSongs]);
+
+	// Search results filtered by query
+	const searchResults = useMemo(() => {
+		if (!searchQuery.trim()) return [];
+		const q = searchQuery.toLowerCase().trim();
+		return allSongsPool.filter(
+			(song) =>
+				song.title.toLowerCase().includes(q) ||
+				song.artist.toLowerCase().includes(q) ||
+				(song.genres || []).some((g) => g.toLowerCase().includes(q))
+		);
+	}, [searchQuery, allSongsPool]);
+
+	const isSearching = searchQuery.trim().length > 0;
 
 	const handlePlaySectionSong = (index: number) => {
 		playAlbum(songs, index);
@@ -190,23 +218,60 @@ const HomePage = () => {
 			<Topbar />
 			<ScrollArea className="h-[calc(100vh-180px)]">
 				<div className="p-4 sm:p-6">
-					<h1 className="text-2xl sm:text-3xl font-bold mb-6 text-white">Good afternoon</h1>
-					<FeaturedSection />
-
-					<div className="space-y-8">
-						<SectionGrid
-							title="Made For You"
-							songs={madeForYouSongs}
-							isLoading={isLoading}
-							onShowAll={() => setActiveSection("made-for-you")}
-						/>
-						<SectionGrid
-							title="Trending"
-							songs={trendingSongs}
-							isLoading={isLoading}
-							onShowAll={() => setActiveSection("trending")}
-						/>
+					{/* Search Bar */}
+					<div className="relative mb-6 group">
+						<div className={`flex items-center gap-3 px-4 py-3 rounded-full border transition-all duration-200 ${
+							isSearching
+								? "bg-white/10 border-emerald-500/60 shadow-lg shadow-emerald-500/10"
+								: "bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/8"
+						}`}>
+							<Search className={`h-5 w-5 flex-shrink-0 transition-colors ${isSearching ? "text-emerald-400" : "text-zinc-400 group-hover:text-zinc-300"}`} />
+							<input
+								ref={searchInputRef}
+								type="text"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								placeholder="Search songs, artists, genres..."
+								className="flex-1 bg-transparent text-white placeholder:text-zinc-500 text-sm outline-none font-medium"
+							/>
+							{isSearching && (
+								<button
+									onClick={() => {
+										setSearchQuery("");
+										searchInputRef.current?.focus();
+									}}
+									className="text-zinc-400 hover:text-white transition-colors flex-shrink-0"
+								>
+									<X className="h-4 w-4" />
+								</button>
+							)}
+						</div>
 					</div>
+
+					{/* Search Results or Normal Home */}
+					{isSearching ? (
+						<SearchResults songs={searchResults} query={searchQuery} />
+					) : (
+						<>
+							<h1 className="text-2xl sm:text-3xl font-bold mb-6 text-white">Good afternoon</h1>
+							<FeaturedSection />
+
+							<div className="space-y-8 mt-8">
+								<SectionGrid
+									title="Made For You"
+									songs={madeForYouSongs}
+									isLoading={isLoading}
+									onShowAll={() => setActiveSection("made-for-you")}
+								/>
+								<SectionGrid
+									title="Trending"
+									songs={trendingSongs}
+									isLoading={isLoading}
+									onShowAll={() => setActiveSection("trending")}
+								/>
+							</div>
+						</>
+					)}
 				</div>
 			</ScrollArea>
 		</main>
