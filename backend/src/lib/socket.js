@@ -8,7 +8,7 @@ export const initializeSocket = (server) => {
 				"http://localhost:3000",
 				"http://localhost:5173",
 				"https://cnpm-webnghenhacnhom2-production.up.railway.app",
-				"cnpm-webnghenhacnhom2-production-263c.up.railway.app",
+				"https://dreamweaver.vercel.app",
 				"https://cnpm-web-nghe-nhac-nhom2.vercel.app"
 			],
 			credentials: true,
