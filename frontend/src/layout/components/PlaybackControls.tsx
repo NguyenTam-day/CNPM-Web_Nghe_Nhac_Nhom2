@@ -4,7 +4,7 @@ import { usePlayerStore } from "@/stores/usePlayerStore";
 import { usePlaylistStore } from "@/stores/usePlaylistStore";
 import { SignedIn } from "@clerk/clerk-react";
 import { cn } from "@/lib/utils";
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, Heart } from "lucide-react";
+import { Laptop2, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, Heart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const formatTime = (seconds: number) => {
