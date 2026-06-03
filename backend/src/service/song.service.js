@@ -1,5 +1,9 @@
 import { Song } from "../models/song.model.js";
 
+export const getSongByIdService = async (songId) => {
+	return await Song.findById(songId).populate("albumId");
+};
+
 export const getAllSongsService = async () => {
 	return await Song.find().sort({ createdAt: -1 });
 };

@@ -1,10 +1,24 @@
 import {
+	getSongByIdService,
 	getAllSongsService,
 	getFeaturedSongsService,
 	getMadeForYouSongsService,
 	getTrendingSongsService,
 	searchSongsService,
 } from "../service/song.service.js";
+
+export const getSongById = async (req, res, next) => {
+	try {
+		const { songId } = req.params;
+		const song = await getSongByIdService(songId);
+		if (!song) {
+			return res.status(404).json({ message: "Song not found" });
+		}
+		res.json(song);
+	} catch (error) {
+		next(error);
+	}
+};
 
 export const getAllSongs = async (req, res, next) => {
 	try {

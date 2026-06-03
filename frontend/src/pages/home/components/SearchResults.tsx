@@ -1,6 +1,7 @@
 import { Song } from "@/types";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Play, Pause, Music } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const formatDuration = (seconds: number) => {
 	const minutes = Math.floor(seconds / 60);
@@ -15,6 +16,7 @@ interface SearchResultsProps {
 
 const SearchResults = ({ songs, query }: SearchResultsProps) => {
 	const { currentSong, isPlaying, setCurrentSong, togglePlay } = usePlayerStore();
+	const navigate = useNavigate();
 
 	if (songs.length === 0) {
 		return (
@@ -78,9 +80,11 @@ const SearchResults = ({ songs, query }: SearchResultsProps) => {
 									<img
 										src={song.imageUrl}
 										alt={song.title}
-										className={`w-11 h-11 object-cover rounded-md shadow-md border border-white/5 transition-all ${
+										className={`w-11 h-11 object-cover rounded-md shadow-md border border-white/5 transition-all cursor-pointer ${
 											isCurrentSong ? "ring-2 ring-emerald-400" : ""
 										}`}
+										onDoubleClick={(e) => { e.stopPropagation(); navigate(`/songs/${song._id}`); }}
+										title="Double-click để xem chi tiết"
 									/>
 									{isCurrentSong && (
 										<div className="absolute inset-0 bg-black/40 rounded-md flex items-center justify-center">

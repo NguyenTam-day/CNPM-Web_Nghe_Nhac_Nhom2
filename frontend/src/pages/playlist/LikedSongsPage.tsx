@@ -4,6 +4,7 @@ import { usePlaylistStore } from "@/stores/usePlaylistStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Clock, Pause, Play, Heart } from "lucide-react";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import SongActionMenu from "@/components/SongActionMenu";
 
 export const formatDuration = (seconds: number) => {
@@ -15,6 +16,7 @@ export const formatDuration = (seconds: number) => {
 const LikedSongsPage = () => {
 	const { fetchFavorites, favorites, isLoading } = usePlaylistStore();
 	const { currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetchFavorites();
@@ -136,7 +138,9 @@ const LikedSongsPage = () => {
 														<img
 															src={song.imageUrl}
 															alt={song.title}
-															className="size-10 object-cover rounded shadow-md"
+															className="size-10 object-cover rounded shadow-md cursor-pointer"
+															onDoubleClick={(e) => { e.stopPropagation(); navigate(`/songs/${song._id}`); }}
+															title="Double-click để xem chi tiết"
 														/>
 														<div className="min-w-0">
 															<div className={`font-semibold truncate ${isCurrentSong ? "text-green-500" : "text-white"}`}>

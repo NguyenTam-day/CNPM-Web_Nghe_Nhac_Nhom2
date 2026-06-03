@@ -9,6 +9,7 @@ import { ArrowLeft, Clock, Pause, Play, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SongActionMenu from "@/components/SongActionMenu";
 import SearchResults from "./components/SearchResults";
+import { useNavigate } from "react-router-dom";
 
 const formatDuration = (seconds: number) => {
 	const minutes = Math.floor(seconds / 60);
@@ -33,6 +34,7 @@ const HomePage = () => {
 	} = useMusicStore();
 
 	const { initializeQueue, currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
+	const navigate = useNavigate();
 	const [activeSection, setActiveSection] = useState<"made-for-you" | "trending" | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
@@ -176,7 +178,9 @@ const HomePage = () => {
 											<img
 												src={song.imageUrl}
 												alt={song.title}
-												className="w-10 h-10 object-cover rounded shadow-md border border-white/5"
+												className="w-10 h-10 object-cover rounded shadow-md border border-white/5 cursor-pointer"
+												onDoubleClick={(e) => { e.stopPropagation(); navigate(`/songs/${song._id}`); }}
+												title="Double-click để xem chi tiết"
 											/>
 											<div className="min-w-0">
 												<div className={`font-semibold truncate ${isCurrentSong ? "text-green-500" : "text-white"}`}>

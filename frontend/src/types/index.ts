@@ -62,3 +62,17 @@ export interface User {
 	fullName: string;
 	imageUrl: string;
 }
+
+export interface Comment {
+	_id: string;
+	userId: string | {
+		_id: string;
+		fullName: string;
+		imageUrl: string;
+		clerkId: string;
+	};
+	songId: string;
+	content: string;
+	createdAt: string;
+	updatedAt: string;
+}

@@ -227,7 +227,9 @@ const PlaylistPage = () => {
 														<img
 															src={song.imageUrl}
 															alt={song.title}
-															className="size-10 object-cover rounded shadow-md"
+															className="size-10 object-cover rounded shadow-md cursor-pointer"
+															onDoubleClick={(e) => { e.stopPropagation(); navigate(`/songs/${song._id}`); }}
+															title="Double-click để xem chi tiết"
 														/>
 														<div className="min-w-0">
 															<div className={`font-semibold truncate ${isCurrentSong ? "text-green-500" : "text-white"}`}>

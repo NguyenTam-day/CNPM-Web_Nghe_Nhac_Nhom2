@@ -4,7 +4,7 @@ import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Clock, Pause, Play } from "lucide-react";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import SongActionMenu from "@/components/SongActionMenu";
 
 export const formatDuration = (seconds: number) => {
@@ -15,6 +15,7 @@ export const formatDuration = (seconds: number) => {
 
 const AlbumPage = () => {
 	const { albumId } = useParams();
+	const navigate = useNavigate();
 	const { fetchAlbumById, currentAlbum, isLoading } = useMusicStore();
 	const { currentSong, isPlaying, playAlbum, togglePlay } = usePlayerStore();
 
@@ -128,7 +129,11 @@ const AlbumPage = () => {
 												</div>
 
 												<div className='flex items-center gap-3 min-w-0'>
-													<img src={song.imageUrl} alt={song.title} className='size-10 object-cover rounded shadow-md' />
+													<img src={song.imageUrl} alt={song.title}
+													className='size-10 object-cover rounded shadow-md cursor-pointer'
+													onDoubleClick={(e) => { e.stopPropagation(); navigate(`/songs/${song._id}`); }}
+													title="Double-click để xem chi tiết"
+												/>
 
 													<div className="min-w-0">
 														<div className={`font-semibold truncate ${isCurrentSong ? "text-green-500" : "text-white"}`}>{song.title}</div>

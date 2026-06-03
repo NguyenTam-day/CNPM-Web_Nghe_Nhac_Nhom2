@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { MoreHorizontal, Heart, Trash2, ListMusic } from "lucide-react";
+import { MoreHorizontal, Heart, Trash2, ListMusic, ExternalLink } from "lucide-react";
 import { usePlaylistStore } from "@/stores/usePlaylistStore";
 import { Song } from "@/types";
 import { SignedIn } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 interface SongActionMenuProps {
 	song: Song;
@@ -13,6 +14,7 @@ export const SongActionMenu = ({ song, playlistId }: SongActionMenuProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [showPlaylists, setShowPlaylists] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
 
 	const {
 		playlists,
@@ -79,6 +81,19 @@ export const SongActionMenu = ({ song, playlistId }: SongActionMenuProps) => {
 
 				{isOpen && (
 					<div className="absolute right-0 mt-2 w-56 rounded-md bg-zinc-950 border border-zinc-800 shadow-xl z-50 py-1 text-sm text-zinc-300 animate-in fade-in duration-100">
+						{/* View Song Details */}
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								setIsOpen(false);
+								navigate(`/songs/${song._id}`);
+							}}
+							className="w-full px-4 py-2 hover:bg-zinc-900 hover:text-white flex items-center gap-3 transition-colors text-left"
+						>
+							<ExternalLink className="h-4 w-4" />
+							<span>Xem chi tiết bài hát</span>
+						</button>
+						<div className="h-[1px] bg-zinc-800 my-1" />
 						{/* Toggle Favorite Option */}
 						<button
 							onClick={handleToggleFavorite}
