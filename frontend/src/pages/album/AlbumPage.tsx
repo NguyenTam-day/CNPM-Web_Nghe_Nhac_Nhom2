@@ -2,16 +2,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Clock, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SongActionMenu from "@/components/SongActionMenu";
-
-export const formatDuration = (seconds: number) => {
-	const minutes = Math.floor(seconds / 60);
-	const remainingSeconds = seconds % 60;
-	return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-};
 
 const AlbumPage = () => {
 	const { albumId } = useParams();
@@ -93,15 +87,12 @@ const AlbumPage = () => {
 						<div className='bg-black/20 backdrop-blur-sm'>
 							{/* table header */}
 							<div
-								className='grid grid-cols-[16px_4fr_1fr_40px] sm:grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 sm:px-10 py-2 text-sm 
+								className='grid grid-cols-[16px_4fr_40px] sm:grid-cols-[16px_4fr_2fr_40px] gap-4 px-4 sm:px-10 py-2 text-sm 
             text-zinc-400 border-b border-white/5 font-semibold'
 							>
 								<div>#</div>
 								<div>Title</div>
 								<div className='hidden sm:block'>Released Date</div>
-								<div>
-									<Clock className='h-4 w-4' />
-								</div>
 								<div></div>
 							</div>
 
@@ -114,7 +105,7 @@ const AlbumPage = () => {
 											<div
 												key={song._id}
 												onClick={() => handlePlaySong(index)}
-												className={`grid grid-cols-[16px_4fr_1fr_40px] sm:grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-2 text-sm 
+												className={`grid grid-cols-[16px_4fr_40px] sm:grid-cols-[16px_4fr_2fr_40px] gap-4 px-4 py-2 text-sm 
                       text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer items-center transition-all ${
 												isCurrentSong ? "bg-white/5" : ""
 											}`}
@@ -141,7 +132,6 @@ const AlbumPage = () => {
 													</div>
 												</div>
 												<div className='hidden sm:flex items-center truncate text-zinc-300'>{song.createdAt?.split("T")[0] || "N/A"}</div>
-												<div className='flex items-center text-zinc-300'>{formatDuration(song.duration)}</div>
 												<div className='flex items-center justify-end' onClick={(e) => e.stopPropagation()}>
 													<SongActionMenu song={song} />
 												</div>

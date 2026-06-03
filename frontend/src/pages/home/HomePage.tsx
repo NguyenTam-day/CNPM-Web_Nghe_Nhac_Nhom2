@@ -5,17 +5,11 @@ import FeaturedSection from "./components/FeaturedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { ArrowLeft, Clock, Pause, Play, Search, X } from "lucide-react";
+import { ArrowLeft, Pause, Play, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SongActionMenu from "@/components/SongActionMenu";
 import SearchResults from "./components/SearchResults";
 import { useNavigate } from "react-router-dom";
-
-const formatDuration = (seconds: number) => {
-	const minutes = Math.floor(seconds / 60);
-	const remainingSeconds = seconds % 60;
-	return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-};
 
 const HomePage = () => {
 	const {
@@ -144,13 +138,10 @@ const HomePage = () => {
 					{/* Songs List Table */}
 					<div className="bg-black/20 backdrop-blur-sm px-4 sm:px-6">
 						{/* Table Header */}
-						<div className="grid grid-cols-[16px_4fr_1fr_40px] sm:grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 border-b border-white/5 font-semibold">
+						<div className="grid grid-cols-[16px_4fr_40px] sm:grid-cols-[16px_4fr_2fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 border-b border-white/5 font-semibold">
 							<div>#</div>
 							<div>Title</div>
 							<div className='hidden sm:block'>Released Date</div>
-							<div className="flex justify-end">
-								<Clock className="h-4 w-4" />
-							</div>
 							<div></div>
 						</div>
 
@@ -162,7 +153,7 @@ const HomePage = () => {
 									<div
 										key={song._id}
 										onClick={() => handlePlaySectionSong(index)}
-										className={`grid grid-cols-[16px_4fr_1fr_40px] sm:grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer items-center transition-all ${isCurrentSong ? "bg-white/5" : ""
+										className={`grid grid-cols-[16px_4fr_40px] sm:grid-cols-[16px_4fr_2fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer items-center transition-all ${isCurrentSong ? "bg-white/5" : ""
 											}`}
 									>
 										<div className="flex items-center justify-center">
@@ -194,9 +185,6 @@ const HomePage = () => {
 											{song.createdAt?.split("T")[0] || "N/A"}
 										</div>
 
-										<div className="flex justify-end text-zinc-300 font-medium">
-											{formatDuration(song.duration)}
-										</div>
 										<div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
 											<SongActionMenu song={song} />
 										</div>

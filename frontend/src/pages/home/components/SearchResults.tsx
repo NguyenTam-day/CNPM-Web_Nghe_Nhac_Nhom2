@@ -3,11 +3,6 @@ import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Play, Pause, Music } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const formatDuration = (seconds: number) => {
-	const minutes = Math.floor(seconds / 60);
-	const remainingSeconds = seconds % 60;
-	return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-};
 
 interface SearchResultsProps {
 	songs: Song[];
@@ -56,9 +51,11 @@ const SearchResults = ({ songs, query }: SearchResultsProps) => {
 						<div
 							key={song._id}
 							onClick={() => handlePlay(song)}
-							className={`grid grid-cols-[32px_3fr_2fr_1fr] sm:grid-cols-[32px_4fr_2fr_80px] items-center gap-4 px-4 py-3 rounded-lg cursor-pointer group transition-all ${
+							onDoubleClick={() => navigate(`/songs/${song._id}`)}
+							className={`grid grid-cols-[32px_1fr] sm:grid-cols-[32px_4fr_2fr] items-center gap-4 px-4 py-3 rounded-lg cursor-pointer group transition-all ${
 								isCurrentSong ? "bg-white/10" : "hover:bg-white/5"
 							}`}
+							title="Double-click để xem chi tiết bài hát"
 						>
 							{/* Index or play icon */}
 							<div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
@@ -113,10 +110,7 @@ const SearchResults = ({ songs, query }: SearchResultsProps) => {
 								))}
 							</div>
 
-							{/* Duration */}
-							<div className="text-zinc-400 text-sm font-medium text-right">
-								{formatDuration(song.duration)}
-							</div>
+
 						</div>
 					);
 				})}

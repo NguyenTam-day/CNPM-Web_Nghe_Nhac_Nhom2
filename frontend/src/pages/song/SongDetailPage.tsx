@@ -11,7 +11,6 @@ import {
 	Trash2,
 	Edit3,
 	Music,
-	Clock,
 	Check,
 	X,
 } from "lucide-react";
@@ -21,11 +20,6 @@ import { axiosInstance } from "@/lib/axios";
 import { Song, Comment } from "@/types";
 import toast from "react-hot-toast";
 
-const formatDuration = (seconds: number) => {
-	const minutes = Math.floor(seconds / 60);
-	const remaining = seconds % 60;
-	return `${minutes}:${remaining.toString().padStart(2, "0")}`;
-};
 
 const formatTimeAgo = (dateString: string) => {
 	const now = new Date();
@@ -193,11 +187,6 @@ const SongDetailPage = () => {
 								<p className="text-lg text-zinc-300 font-medium">{song.artist}</p>
 
 								<div className="flex items-center justify-center sm:justify-start gap-3 text-sm text-zinc-400 flex-wrap">
-									<span className="flex items-center gap-1">
-										<Clock className="h-3.5 w-3.5" />
-										{formatDuration(song.duration)}
-									</span>
-									<span>•</span>
 									<span>{song.createdAt?.split("T")[0]}</span>
 									{song.genres && song.genres.length > 0 && (
 										<>
