@@ -1,11 +1,11 @@
 import Topbar from "@/components/Topbar";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import FeaturedSection from "./components/FeaturedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { ArrowLeft, Pause, Play, Search, X } from "lucide-react";
+import { ArrowLeft, Pause, Play, Search, X, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SongActionMenu from "@/components/SongActionMenu";
 import SearchResults from "./components/SearchResults";
@@ -32,6 +32,39 @@ const HomePage = () => {
 	const [activeSection, setActiveSection] = useState<"made-for-you" | "trending" | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
+	const [sortBy, setSortBy] = useState<"plays" | "title" | "date" | "default">("default");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+	const displaySongs = useMemo(() => {
+		let list = [...songs];
+
+		if (sortBy === "default") {
+			if (activeSection === "trending") {
+				list.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+			}
+			return list;
+		}
+
+		return list.sort((a, b) => {
+			let valA: any = "";
+			let valB: any = "";
+
+			if (sortBy === "title") {
+				valA = a.title.toLowerCase();
+				valB = b.title.toLowerCase();
+			} else if (sortBy === "plays") {
+				valA = a.playCount || 0;
+				valB = b.playCount || 0;
+			} else if (sortBy === "date") {
+				valA = new Date(a.createdAt).getTime();
+				valB = new Date(b.createdAt).getTime();
+			}
+
+			if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+			if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [songs, activeSection, sortBy, sortOrder]);
 
 	useEffect(() => {
 		fetchFeaturedSongs();
@@ -69,16 +102,16 @@ const HomePage = () => {
 	const isSearching = searchQuery.trim().length > 0;
 
 	const handlePlaySectionSong = (index: number) => {
-		playAlbum(songs, index);
+		playAlbum(displaySongs, index);
 	};
 
 	const handlePlayAllSection = () => {
-		if (songs.length === 0) return;
-		const isCurrentSongInSection = songs.some((s) => s._id === currentSong?._id);
+		if (displaySongs.length === 0) return;
+		const isCurrentSongInSection = displaySongs.some((s) => s._id === currentSong?._id);
 		if (isCurrentSongInSection) {
 			togglePlay();
 		} else {
-			playAlbum(songs, 0);
+			playAlbum(displaySongs, 0);
 		}
 	};
 
@@ -115,7 +148,7 @@ const HomePage = () => {
 							<div className="flex items-center gap-2 text-sm text-zinc-400 mt-2">
 								<span className="font-semibold text-white">Dreamweaver</span>
 								<span>•</span>
-								<span>{songs.length} songs</span>
+								<span>{displaySongs.length} songs</span>
 							</div>
 						</div>
 
@@ -126,7 +159,7 @@ const HomePage = () => {
 								size="icon"
 								className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-400 hover:scale-105 transition-all flex items-center justify-center shadow-lg"
 							>
-								{isPlaying && songs.some((s) => s._id === currentSong?._id) ? (
+								{isPlaying && displaySongs.some((s) => s._id === currentSong?._id) ? (
 									<Pause className="h-7 w-7 text-black fill-black" />
 								) : (
 									<Play className="h-7 w-7 text-black fill-black ml-1" />
@@ -138,16 +171,64 @@ const HomePage = () => {
 					{/* Songs List Table */}
 					<div className="bg-black/20 backdrop-blur-sm px-4 sm:px-6">
 						{/* Table Header */}
-						<div className="grid grid-cols-[16px_4fr_40px] sm:grid-cols-[16px_4fr_2fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 border-b border-white/5 font-semibold">
-							<div>#</div>
-							<div>Title</div>
-							<div className='hidden sm:block'>Released Date</div>
+						<div className="grid grid-cols-[16px_4fr_40px] sm:grid-cols-[16px_4fr_2fr_40px] gap-4 px-4 py-3 text-sm text-zinc-400 border-b border-white/5 font-semibold items-center select-none">
+							<div 
+								className="cursor-pointer hover:text-white transition-colors"
+								onClick={() => {
+									setSortBy("default");
+									setSortOrder("desc");
+								}}
+								title="Reset về mặc định"
+							>
+								#
+							</div>
+							<div 
+								className="cursor-pointer hover:text-white flex items-center gap-1 transition-colors"
+								onClick={() => {
+									if (sortBy === "title") {
+										setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+									} else {
+										setSortBy("title");
+										setSortOrder("asc");
+									}
+								}}
+							>
+								Title
+								<ArrowUpDown className={`h-3.5 w-3.5 transition-colors ${sortBy === "title" ? "text-emerald-400 opacity-100" : "opacity-30"}`} />
+							</div>
+							<div 
+								className="hidden sm:flex cursor-pointer hover:text-white items-center gap-1 transition-colors"
+								onClick={() => {
+									if (activeSection === "trending") {
+										if (sortBy === "plays") {
+											setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+										} else {
+											setSortBy("plays");
+											setSortOrder("desc");
+										}
+									} else {
+										if (sortBy === "date") {
+											setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+										} else {
+											setSortBy("date");
+											setSortOrder("desc");
+										}
+									}
+								}}
+							>
+								{activeSection === "trending" ? "Plays" : "Released Date"}
+								<ArrowUpDown className={`h-3.5 w-3.5 transition-colors ${
+									(activeSection === "trending" && sortBy === "plays") || (activeSection !== "trending" && sortBy === "date")
+										? "text-emerald-400 opacity-100" 
+										: "opacity-30"
+								}`} />
+							</div>
 							<div></div>
 						</div>
 
 						{/* Table Songs */}
 						<div className="space-y-1 py-4">
-							{songs.map((song, index) => {
+							{displaySongs.map((song, index) => {
 								const isCurrentSong = currentSong?._id === song._id;
 								return (
 									<div
@@ -182,7 +263,9 @@ const HomePage = () => {
 										</div>
 
 										<div className="truncate text-zinc-300 font-medium hidden sm:block">
-											{song.createdAt?.split("T")[0] || "N/A"}
+											{activeSection === "trending"
+												? `${(song.playCount || 0).toLocaleString()} plays`
+												: (song.createdAt?.split("T")[0] || "N/A")}
 										</div>
 
 										<div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
@@ -251,7 +334,7 @@ const HomePage = () => {
 								/>
 								<SectionGrid
 									title="Trending"
-									songs={trendingSongs}
+									songs={trendingSongs.slice(0, 4)}
 									isLoading={isLoading}
 									onShowAll={() => setActiveSection("trending")}
 								/>

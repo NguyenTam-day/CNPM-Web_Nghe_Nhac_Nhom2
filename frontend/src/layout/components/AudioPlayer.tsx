@@ -1,11 +1,23 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useEffect, useRef } from "react";
+import { axiosInstance } from "@/lib/axios";
 
 const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const prevSongRef = useRef<string | null>(null);
+	const playTrackedRef = useRef<boolean>(false);
 
 	const { currentSong, isPlaying, playNext } = usePlayerStore();
+
+	// helper to increment play count once
+	const handlePlayIncrement = () => {
+		if (!playTrackedRef.current && currentSong) {
+			playTrackedRef.current = true;
+			axiosInstance.post(`/songs/${currentSong._id}/play`).catch((err) => {
+				console.error("Failed to increment play count:", err);
+			});
+		}
+	};
 
 	// handle play/pause logic
 	useEffect(() => {
@@ -13,18 +25,34 @@ const AudioPlayer = () => {
 		else audioRef.current?.pause();
 	}, [isPlaying]);
 
-	// handle song ends
+	// handle song ends and active listening updates
 	useEffect(() => {
 		const audio = audioRef.current;
+		if (!audio) return;
 
 		const handleEnded = () => {
+			handlePlayIncrement();
 			playNext();
 		};
 
-		audio?.addEventListener("ended", handleEnded);
+		const handleTimeUpdate = () => {
+			const duration = audio.duration;
+			if (
+				audio.currentTime >= 30 ||
+				(duration && duration < 30 && audio.currentTime >= duration - 1)
+			) {
+				handlePlayIncrement();
+			}
+		};
 
-		return () => audio?.removeEventListener("ended", handleEnded);
-	}, [playNext]);
+		audio.addEventListener("ended", handleEnded);
+		audio.addEventListener("timeupdate", handleTimeUpdate);
+
+		return () => {
+			audio.removeEventListener("ended", handleEnded);
+			audio.removeEventListener("timeupdate", handleTimeUpdate);
+		};
+	}, [playNext, currentSong]);
 
 	// handle song changes
 	useEffect(() => {
@@ -40,6 +68,7 @@ const AudioPlayer = () => {
 			audio.currentTime = 0;
 
 			prevSongRef.current = currentSong?.audioUrl;
+			playTrackedRef.current = false; // reset tracking for new song
 
 			if (isPlaying) audio.play();
 		}

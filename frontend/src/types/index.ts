@@ -10,6 +10,7 @@ export interface Song {
 	updatedAt: string;
 	genres?: string[];
 	lyrics?: string;
+	playCount?: number;
 }
 
 export interface Album {
